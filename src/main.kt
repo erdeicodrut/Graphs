@@ -47,14 +47,12 @@ class App : PApplet() {
     }
 
     private fun addNode(num: Int) {
+        // Carpeala
         try {
             if (
                 listOfDrawableNodes.any { it ->
                     it.detectIfArea(
-                        listOfDrawableNodes
-                            .firstOrNull { it2 ->
-                                it2.node == num
-                            }!!.position
+                        PVector(p.mouseX.toFloat(), p.mouseY.toFloat())
                     )
                 }
             ) return
