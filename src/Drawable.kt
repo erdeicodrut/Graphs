@@ -43,6 +43,17 @@ class DrawableEdge(
     val to: PVector,
     var color: Triple<Int, Int, Int> = Triple(0, 0, 0)
 ) {
+
+    val position = PVector.add(from, to).div(2f)
+
+    var posToDrawText = PVector.sub(position, PVector(0f, -20f))
+
+    init {
+        listClickableValues.add(ListenerForEdgeValue(posToDrawText) {
+            graph.listOfEdges.first { it.index == num }.value++
+        })
+    }
+
     fun draw(offset: Float, dict: HashMap<String, Int>) {
 
         val value = graph.listOfEdges.first { it.index == num }.value
@@ -60,9 +71,7 @@ class DrawableEdge(
 
         val edge = graph.listOfEdges.first { it.index == num }
 
-        val position = PVector.add(from, to).div(2f)
 
-        var posToDrawText = PVector.sub(position, PVector(0f, -20f))
 
         if (edge.from == edge.to) {
             p.pushStyle()
@@ -91,5 +100,11 @@ class DrawableEdge(
 
         p.popStyle()
     }
+
+}
+
+data class ListenerForEdgeValue(val pos: PVector? = null, var add: () -> Unit = {}) {
+    fun clicked(): Boolean =
+        pos?.dist(PVector(p.mouseX.toFloat(), p.mouseY.toFloat()))!! < 25
 
 }

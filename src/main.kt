@@ -8,9 +8,12 @@ var lastNodeClicked = -1
 
 val graph = Graph()
 
-val directed = false
+val directed = true
 
 val backgroundColor = 128
+
+val listClickableValues = arrayListOf<ListenerForEdgeValue>()
+
 
 class App : PApplet() {
     var indexOfNodes = 0
@@ -31,6 +34,8 @@ class App : PApplet() {
     }
 
     override fun mousePressed() {
+
+        listClickableValues.forEach { if (it.clicked())  { it.add(); redraw(); return} }
 
         if (keyPressed && key == 'c') {
             listOfDrawableEdges[0].color = Triple(random(255f).toInt(), random(255f).toInt(), random(255f).toInt())
@@ -54,6 +59,7 @@ class App : PApplet() {
         } else {
             addNode()
         }
+
 
         redraw()
 
@@ -101,6 +107,10 @@ class App : PApplet() {
 //        graph.listOfEdges.first { it.index == indexOfEdges }.dict["poc"] = random(5f).toInt()
 
         indexOfEdges++
+    }
+
+    fun addEdgeListener(temp: ListenerForEdgeValue) {
+        listClickableValues.add(temp)
     }
 
     var imageNr = 0
