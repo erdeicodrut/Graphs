@@ -8,9 +8,13 @@ var lastNodeClicked = -1
 
 val graph = Graph()
 
+val directed = false
+
+val backgroundColor = 128
 
 class App : PApplet() {
     var indexOfNodes = 0
+    var indexOfEdges = 0
     val listOfDrawableNodes = arrayListOf<DrawableNode>()
     val listOfDrawableEdges = arrayListOf<DrawableEdge>()
 
@@ -22,9 +26,15 @@ class App : PApplet() {
     override fun setup() {
         frameRate(20f)
         rectMode(CENTER)
+        noLoop()
+//        redraw()
     }
 
-    override fun mouseClicked() {
+    override fun mousePressed() {
+
+        if (keyPressed && key == 'c') {
+            listOfDrawableEdges[0].color = Triple(random(255f).toInt(), random(255f).toInt(), random(255f).toInt())
+        }
 
         if (keyPressed && key == ' ') {
             println(keyPressed)
@@ -37,16 +47,19 @@ class App : PApplet() {
                 if (lastNodeClicked == -1) lastNodeClicked = it.node
                 else {
                     // Add value later
-                    addEdge(lastNodeClicked, it.node, 1, Triple(0, 0, 0))
+                    addEdge(lastNodeClicked, it.node, 1)
                     lastNodeClicked = -1
                 }
             }
         } else {
-            addNode(indexOfNodes++)
+            addNode()
         }
+
+        redraw()
+
     }
 
-    private fun addNode(num: Int) {
+    private fun addNode() {
         // Carpeala
         try {
             if (
@@ -56,41 +69,66 @@ class App : PApplet() {
                     )
                 }
             ) return
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
 
-        graph.listOfNodes.add(Node(num))
+        graph.listOfNodes.add(Node(indexOfNodes))
         listOfDrawableNodes.add(
             DrawableNode(
-                num,
+                indexOfNodes,
                 Triple(255, 255, 255),
                 PVector(p.mouseX.toFloat(), p.mouseY.toFloat())
             )
         )
+        indexOfNodes++
     }
 
-    private fun addEdge(from: Int, to: Int, value: Int = 0, color: Triple<Int, Int, Int>) {
+    private fun addEdge(from: Int, to: Int, value: Int = 0, color: Triple<Int, Int, Int> = Triple(0, 0, 0)) {
 
         val fromN = listOfDrawableNodes.first { it.node == from }
         val toN = listOfDrawableNodes.first { it.node == to }
 
         listOfDrawableEdges.add(
             DrawableEdge(
+                indexOfEdges,
                 fromN.position,
                 toN.position,
-                value,
                 color
             )
         )
-        graph.createEdge(from, to, value)
+        graph.createEdge(from, to, value, indexOfEdges)
+
+//        graph.listOfEdges.first { it.index == indexOfEdges }.dict["poc"] = random(5f).toInt()
+
+        indexOfEdges++
     }
 
+    var imageNr = 0
     override fun draw() {
-        background(128)
+        background(backgroundColor)
 
-        listOfDrawableNodes.forEach(DrawableNode::draw)
-        listOfDrawableEdges.forEach(DrawableEdge::draw)
+        for ((index, drawable) in listOfDrawableEdges.withIndex()) {
+            val hashMapOfEdge = graph.listOfEdges.first { drawable.num == it.index }.dict
+
+            val howManyEdgesInTheSamePlaceSoFar = listOfDrawableEdges.subList(
+                0,
+                index
+            ).filter { drawable.from == it.from && drawable.to == it.to || drawable.from == it.to && drawable.from == it.to }
+                .size
+                .toFloat()
+
+            drawable.draw(pow(-1f, howManyEdgesInTheSamePlaceSoFar) * howManyEdgesInTheSamePlaceSoFar * 10/2, hashMapOfEdge)
+        }
+
+        listOfDrawableNodes.forEach {
+            val hashMapOfNode = graph.listOfNodes.first {it2 -> it.node == it2.num }.dict
+
+            it.draw(hashMapOfNode)
+        }
+        save("thing_$imageNr.png")
 
     }
+
 }
 
 fun main(args: Array<String>) {

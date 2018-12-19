@@ -13,7 +13,7 @@ class Graph {
         return listToReturn
     }
 
-    fun createEdge(from: Int, to: Int, value: Int = 0) {
-        listOfEdges.add(Edge(from, to, value))
+    fun createEdge(from: Int, to: Int, value: Int = 0, index: Int) {
+        listOfEdges.add(Edge(from, to, value, index))
     }
 }

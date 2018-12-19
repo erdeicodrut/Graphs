@@ -1,12 +1,8 @@
 import processing.core.PApplet
 import processing.core.PVector
 
-interface Drawable {
-    fun draw()
-}
-
-class DrawableNode(val node: Int, var color: Triple<Int, Int, Int>, val position: PVector) : Drawable {
-    override fun draw() {
+class DrawableNode(val node: Int, var color: Triple<Int, Int, Int>, val position: PVector) {
+    fun draw(dict: HashMap<String, Int>) {
         p.pushStyle()
 
         p.rectMode(PApplet.CENTER)
@@ -19,6 +15,21 @@ class DrawableNode(val node: Int, var color: Triple<Int, Int, Int>, val position
         p.fill(0)
         p.text("$node", position.x, position.y)
 
+
+        p.fill(0)
+        p.textSize(20f)
+        p.textAlign(PApplet.CENTER)
+        p.rectMode(PApplet.CENTER)
+
+        var posToDrawText = PVector.sub(position, PVector(0f, -20f))
+
+        dict.entries.forEach {
+            p.text("${it.key}: ${it.value}", posToDrawText.x, posToDrawText.y)
+            posToDrawText = PVector.sub(posToDrawText, PVector(0f, -20f))
+        }
+
+
+
         p.popStyle()
     }
 
@@ -26,25 +37,57 @@ class DrawableNode(val node: Int, var color: Triple<Int, Int, Int>, val position
     fun detectIfArea(node: PVector): Boolean = PVector.dist(position, node) < 50
 }
 
-class DrawableEdge(val from: PVector, val to: PVector, val value: Int, var color: Triple<Int, Int, Int>): Drawable {
-    override fun draw() {
-        println("${from.x} ${from.y} ${to.x} ${to.y}")
+class DrawableEdge(
+    val num: Int,
+    val from: PVector,
+    val to: PVector,
+    var color: Triple<Int, Int, Int> = Triple(0, 0, 0)
+) {
+    fun draw(offset: Float, dict: HashMap<String, Int>) {
+
+        val value = graph.listOfEdges.first { it.index == num }.value
 
         p.pushStyle()
 
+        p.fill(0)
+        p.textSize(20f)
+        p.textAlign(PApplet.CENTER)
         p.rectMode(PApplet.CENTER)
 
-        p.strokeWeight(5f)
+        p.strokeWeight(2f)
         p.stroke(color.first.toFloat(), color.second.toFloat(), color.third.toFloat())
-        p.line(from.x, from.y, to.x, to.y)
 
-        p.textAlign(PApplet.CENTER)
-        p.textSize(20f)
-        p.fill(0)
+
+        val edge = graph.listOfEdges.first { it.index == num }
 
         val position = PVector.add(from, to).div(2f)
 
-        p.text("$value", position.x, position.y)
+        var posToDrawText = PVector.sub(position, PVector(0f, -20f))
+
+        if (edge.from == edge.to) {
+            p.pushStyle()
+
+            p.fill(backgroundColor, 0f)
+
+            p.ellipseMode(PApplet.BOTTOM)
+            p.ellipse(position.x, position.y, 100f + offset, 100f + offset)
+
+            p.popStyle()
+        } else {
+            p.line(from.x + offset, from.y + offset, to.x + offset, to.y + offset)
+        }
+
+
+        dict.entries.forEach {
+            p.text("${it.key}: ${it.value}", posToDrawText.x, posToDrawText.y)
+            posToDrawText = PVector.sub(posToDrawText, PVector(0f, -20f))
+        }
+
+
+        if (directed) {
+            //TODO add to a list of clickables and check if clicked. if clicked +1 to value
+            p.text("$value", position.x, position.y)
+        }
 
         p.popStyle()
     }
