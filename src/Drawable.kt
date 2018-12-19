@@ -2,6 +2,7 @@ import processing.core.PApplet
 import processing.core.PVector
 
 class DrawableNode(val node: Int, var color: Triple<Int, Int, Int>, val position: PVector) {
+
     fun draw(dict: HashMap<String, Int>) {
         p.pushStyle()
 
@@ -49,9 +50,16 @@ class DrawableEdge(
     var posToDrawText = PVector.sub(position, PVector(0f, -20f))
 
     init {
-        listClickableValues.add(ListenerForEdgeValue(posToDrawText) {
-            graph.listOfEdges.first { it.index == num }.value++
-        })
+        listClickableValues.add(ListenerForEdgeValue(
+            posToDrawText,
+            {
+                graph.listOfEdges.first { it.index == num }.value++
+            },
+            {
+                graph.listOfEdges.first { it.index == num }.value--
+            }
+        ))
+
     }
 
     fun draw(offset: Float, dict: HashMap<String, Int>) {
@@ -94,7 +102,6 @@ class DrawableEdge(
 
 
         if (directed) {
-            //TODO add to a list of clickables and check if clicked. if clicked +1 to value
             p.text("$value", position.x, position.y)
         }
 
@@ -103,8 +110,6 @@ class DrawableEdge(
 
 }
 
-data class ListenerForEdgeValue(val pos: PVector? = null, var add: () -> Unit = {}) {
-    fun clicked(): Boolean =
-        pos?.dist(PVector(p.mouseX.toFloat(), p.mouseY.toFloat()))!! < 25
-
+data class ListenerForEdgeValue(val pos: PVector? = null, var add: () -> Unit = {}, var sub: () -> Unit = {}) {
+    fun clicked(): Boolean = pos?.dist(PVector(p.mouseX.toFloat(), p.mouseY.toFloat()))!! < 25
 }

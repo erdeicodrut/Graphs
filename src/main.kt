@@ -35,7 +35,7 @@ class App : PApplet() {
 
     override fun mousePressed() {
 
-        listClickableValues.forEach { if (it.clicked())  { it.add(); redraw(); return} }
+        listClickableValues.forEach { if (it.clicked())  { if (key == 'd') it.sub() else it.add(); redraw(); return} }
 
         if (keyPressed && key == 'c') {
             listOfDrawableEdges[0].color = Triple(random(255f).toInt(), random(255f).toInt(), random(255f).toInt())
