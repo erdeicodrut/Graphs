@@ -53,7 +53,7 @@ class DrawableEdge(
         listClickableValues.add(ListenerForEdgeValue(
             posToDrawText,
             {
-                graph.listOfEdges.firstOrNull { it.index == num }.value++
+                graph.listOfEdges.first { it.index == num }.value++
             },
             {
                 graph.listOfEdges.first { it.index == num }.value--

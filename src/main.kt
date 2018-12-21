@@ -137,7 +137,7 @@ class App : PApplet() {
     fun destructEdges() {
         val to_remove = arrayListOf<Int>()
         for (edge in graph.listOfEdges) {
-            if (graph.listOfNodes.none { it.num == edge.from || it.num == edge.to }) {
+            if (graph.listOfNodes.none { it.num == edge.from } || graph.listOfNodes.none { it.num == edge.to }) {
                 to_remove.add(edge.index)
             }
         }
@@ -150,6 +150,8 @@ class App : PApplet() {
     var imageNr = 0
     override fun draw() {
         background(backgroundColor)
+
+        destructEdges()
 
         for ((index, drawable) in listOfDrawableEdges.withIndex()) {
             val hashMapOfEdge = graph.listOfEdges.first { drawable.num == it.index }.dict
@@ -173,7 +175,6 @@ class App : PApplet() {
 
             it.draw(hashMapOfNode)
         }
-        destructEdges()
         save("thing_$imageNr.png")
 
     }
