@@ -35,38 +35,52 @@ class App : PApplet() {
 
     override fun mousePressed() {
 
-        listClickableValues.forEach { if (it.clicked())  { if (key == 'd') it.sub() else it.add(); redraw(); return} }
+        listClickableValues.forEach {
+            if (it.clicked()) {
+                if (key == 'd') it.sub() else it.add(); redraw(); return
+            }
+        }
 
         if (keyPressed && key == 'c') {
             listOfDrawableEdges[0].color = Triple(random(255f).toInt(), random(255f).toInt(), random(255f).toInt())
         }
 
-        if (keyPressed && key == ' ') {
-            println(keyPressed)
-            for (it in listOfDrawableNodes) {
-                val clicked = it.detectIfClicked()
-                println("clicked ${it.node}")
+        if (keyPressed) {
+            when (key) {
+                ' ' -> {
+                    println(keyPressed)
+                    for (it in listOfDrawableNodes) {
+                        val clicked = it.detectIfClicked()
+                        println("clicked ${it.node}")
 
-                if (!clicked) continue
+                        if (!clicked) continue
 
-                if (lastNodeClicked == -1) lastNodeClicked = it.node
-                else {
-                    // Add value later
-                    addEdge(lastNodeClicked, it.node, 1)
-                    lastNodeClicked = -1
+                        if (lastNodeClicked == -1) lastNodeClicked = it.node
+                        else {
+                            // Add value later
+                            addEdge(lastNodeClicked, it.node, 1)
+                            lastNodeClicked = -1
+                        }
+                    }
+                }
+                'r' -> {
+                    val nodeToDelete = listOfDrawableNodes.firstOrNull { it.detectIfClicked() }
+
+                    nodeToDelete?.let {
+                        removeNode(it.node)
+                    }
                 }
             }
         } else {
             addNode()
         }
 
-
         redraw()
 
     }
 
+
     private fun addNode() {
-        // Carpeala
         try {
             if (
                 listOfDrawableNodes.any { it ->
@@ -87,6 +101,13 @@ class App : PApplet() {
             )
         )
         indexOfNodes++
+    }
+
+    private fun removeNode(nodeIndex: Int) {
+
+        graph.listOfNodes.remove(graph.listOfNodes.first { nodeIndex == it.num} )
+        listOfDrawableNodes.remove(listOfDrawableNodes.first { nodeIndex == it.node })
+
     }
 
     private fun addEdge(from: Int, to: Int, value: Int = 0, color: Triple<Int, Int, Int> = Triple(0, 0, 0)) {
@@ -113,6 +134,19 @@ class App : PApplet() {
         listClickableValues.add(temp)
     }
 
+    fun destructEdges() {
+        val to_remove = arrayListOf<Int>()
+        for (edge in graph.listOfEdges) {
+            if (graph.listOfNodes.none { it.num == edge.from || it.num == edge.to }) {
+                to_remove.add(edge.index)
+            }
+        }
+        to_remove.forEach { it2 ->
+            graph.listOfEdges.remove(graph.listOfEdges.first { it.index == it2 })
+            listOfDrawableEdges.remove(listOfDrawableEdges.first { it.num == it2 })
+        }
+    }
+
     var imageNr = 0
     override fun draw() {
         background(backgroundColor)
@@ -123,18 +157,23 @@ class App : PApplet() {
             val howManyEdgesInTheSamePlaceSoFar = listOfDrawableEdges.subList(
                 0,
                 index
-            ).filter { drawable.from == it.from && drawable.to == it.to || drawable.from == it.to && drawable.from == it.to }
+            )
+                .filter { drawable.from == it.from && drawable.to == it.to || drawable.from == it.to && drawable.from == it.to }
                 .size
                 .toFloat()
 
-            drawable.draw(pow(-1f, howManyEdgesInTheSamePlaceSoFar) * howManyEdgesInTheSamePlaceSoFar * 10/2, hashMapOfEdge)
+            drawable.draw(
+                pow(-1f, howManyEdgesInTheSamePlaceSoFar) * howManyEdgesInTheSamePlaceSoFar * 10 / 2,
+                hashMapOfEdge
+            )
         }
 
         listOfDrawableNodes.forEach {
-            val hashMapOfNode = graph.listOfNodes.first {it2 -> it.node == it2.num }.dict
+            val hashMapOfNode = graph.listOfNodes.first { it2 -> it.node == it2.num }.dict
 
             it.draw(hashMapOfNode)
         }
+        destructEdges()
         save("thing_$imageNr.png")
 
     }
